@@ -60,8 +60,7 @@
             android:exported="true"
             android:label="Capture"
             android:windowSoftInputMode="stateUnchanged"
-            android:excludeFromRecents="true"
-            android:taskAffinity="">
+            android:launchMode="singleInstance">
 
             <intent-filter>
                 <action android:name="android.intent.action.SEND"/>
