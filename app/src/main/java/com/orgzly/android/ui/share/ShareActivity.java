@@ -40,6 +40,8 @@ import com.orgzly.android.util.MiscUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
@@ -108,16 +110,20 @@ public class ShareActivity extends CommonActivity
         } else if (type == null) {
             // mError = getString(R.string.share_type_not_set);
 
-        } else if (action.equals(Intent.ACTION_SEND)) {
+        } else if (action.equals(Intent.ACTION_SEND) || action.equals(Intent.ACTION_PROCESS_TEXT)) {
+            String text = null;
+            String subject = null;
             if (type.startsWith("text/")) {
 
                 if (intent.hasExtra(Intent.EXTRA_TEXT)) {
-                    data.title = intent.getStringExtra(Intent.EXTRA_TEXT);
+                    text = intent.getStringExtra(Intent.EXTRA_TEXT);
 
+                } else if (intent.hasExtra(Intent.EXTRA_PROCESS_TEXT)) {
+                    text = intent.getStringExtra(Intent.EXTRA_PROCESS_TEXT);
                 } else if (intent.hasExtra(Intent.EXTRA_STREAM)) {
                     Uri uri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
 
-                    data.title = uri.getLastPathSegment();
+                    subject = uri.getLastPathSegment();
 
                     /*
                      * Store file's content as note content.
@@ -132,7 +138,7 @@ public class ShareActivity extends CommonActivity
                                     MAX_TEXT_FILE_LENGTH_FOR_CONTENT + " bytes)";
 
                         } else {
-                            data.content = MiscUtils.readStringFromFile(file);
+                            text = MiscUtils.readStringFromFile(file);
                         }
 
                     } catch (IOException e) {
@@ -141,12 +147,36 @@ public class ShareActivity extends CommonActivity
                     }
                 }
 
-                if (data.title != null && data.content == null && intent.hasExtra(Intent.EXTRA_SUBJECT)) {
-                    data.content = data.title;
-                    data.title = intent.getStringExtra(Intent.EXTRA_SUBJECT);
+                if (subject == null && intent.hasExtra(Intent.EXTRA_SUBJECT)) {
+                    subject = intent.getStringExtra(Intent.EXTRA_SUBJECT);
                 }
 
                 // TODO: Was used for direct share shortcuts to pass the book name. Used someplace else?
+                // TODO fill in the actual proper template
+                if (subject == null) {
+                    // use text as title
+                    data.title = text;
+                } else {
+                    data.title = subject.split("\n")[0];
+                }
+
+                if (text != null && !text.isEmpty()) {
+                    Pattern pattern = Pattern.compile("^(http)s?.*");
+                    Matcher matcher = pattern.matcher(text);
+                    if (matcher.matches()) {
+                        // if text is in url format, let's wrap it in org url
+                        if (subject == null) {
+                            data.content = text;
+                        } else {
+                            data.content = "[[" + text + "][" + subject + "]]";
+                        }
+                    } else {
+                        // else, put it in a quote
+                        data.content = "#+BEGIN_QUOTE\n" + text + "\n#+END_QUOTE";
+                    }
+                }
+
+
                 if (intent.hasExtra(AppIntent.EXTRA_QUERY_STRING)) {
                     Query query = new DottedQueryParser().parse(intent.getStringExtra(AppIntent.EXTRA_QUERY_STRING));
                     String bookName = QueryUtils.extractFirstBookNameFromQuery(query.getCondition());

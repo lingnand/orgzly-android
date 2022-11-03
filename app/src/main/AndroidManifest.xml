@@ -58,6 +58,7 @@
         <activity
             android:name=".android.ui.share.ShareActivity"
             android:exported="true"
+            android:label="Capture"
             android:windowSoftInputMode="stateUnchanged"
             android:excludeFromRecents="true"
             android:taskAffinity="">
@@ -74,6 +75,12 @@
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="image/*" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.PROCESS_TEXT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
             </intent-filter>
 
             <meta-data
