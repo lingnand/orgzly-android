@@ -178,6 +178,10 @@
             android:name=".android.ui.SyncShortcutActivity"
             android:taskAffinity="" />
 
+        <service
+             android:name=".android.sync.SyncService"
+             android:exported="true" />
+
         <activity
             android:name=".android.ui.LogsActivity"
             android:exported="false"
