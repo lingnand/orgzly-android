@@ -24,8 +24,10 @@ object OrgFormatter {
 
     private const val CUSTOM_LINK_SCHEMES = "id|file"
 
+    private const val MID_LINK_SCHEME = "mid"
+
     // Supported link schemas for plain links
-    private const val LINK_SCHEMES = "(?:$SYSTEM_LINK_SCHEMES|$CUSTOM_LINK_SCHEMES)"
+    private const val LINK_SCHEMES = "(?:$SYSTEM_LINK_SCHEMES|$CUSTOM_LINK_SCHEMES|$MID_LINK_SCHEME)"
 
     private val LINK_REGEX =
         """(?<![a-zA-Z0-9_@%:])($LINK_SCHEMES:\S+)|(\[\[(.+?)](?:\[(.+?)])?])""".toRegex()
@@ -188,6 +190,9 @@ object OrgFormatter {
 
             link.matches("^(?:$SYSTEM_LINK_SCHEMES):.+".toRegex()) ->
                 UrlLinkSpan(linkType, link, name)
+
+            link.matches("^(?:$MID_LINK_SCHEME):.+".toRegex()) ->
+                MidLinkSpan(linkType, link, name)
 
             isFile(link) ->
                 FileOrNotLinkSpan(linkType, link, name)
