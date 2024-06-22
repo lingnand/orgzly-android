@@ -24,7 +24,7 @@ class SyncService : Service() {
             SyncRunner.startSync()
         }
 
-        return Service.START_REDELIVER_INTENT
+        return Service.START_NOT_STICKY
     }
 
     override fun onBind(intent: Intent): IBinder? {
